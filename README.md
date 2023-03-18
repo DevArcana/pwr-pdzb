@@ -1,3 +1,5 @@
+## Environment preparation
+
 [Log into your Kaggle account here.](https://www.kaggle.com/account/login)
 
 Follow the highlighted steps.
@@ -20,6 +22,8 @@ Extract the username and key and fill the `.env` file accordingly (create it if 
 KAGGLE_USERNAME=username
 KAGGLE_KEY=abcd1234defg5678abcd1234defg5678
 ```
+
+`Setup .kaggle folder` in your user root directory and `copy` previously downloaded `kaggle.json` file to this folder.
 
 In order for the setup script to work, ensure your python instance can be invoked via the `python` command:
 
