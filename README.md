@@ -21,10 +21,10 @@ KAGGLE_USERNAME=username
 KAGGLE_KEY=abcd1234defg5678abcd1234defg5678
 ```
 
-In order for the setup script to work, ensure your python instance can be invoked via the `python3` command:
+In order for the setup script to work, ensure your python instance can be invoked via the `python` command:
 
 ```sh
-> python3 --version
+> python --version
 Python 3.11.2
 ```
 
