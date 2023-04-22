@@ -15,4 +15,5 @@ def hdfs_set_replication_level(number):
 
 #hdfs_upload("covid.csv")
 #hdfs_upload("steam_dataset")
+hdfs_upload("test.txt")
 hdfs_set_replication_level(4)
