@@ -40,6 +40,7 @@ services:
       - ./tmp/hbase_logs/master:/usr/local/hbase/logs
       - ./tmp/hive_logs:/usr/local/hive/logs
       - ./tmp/sqoop_logs:/usr/local/sqoop/logs
+      - ../../data:/workspace
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.3
