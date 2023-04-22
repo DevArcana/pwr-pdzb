@@ -8,7 +8,7 @@ services:
       - 3306:3306
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - /Users/Shared/workspace/docker-ws/maria-data:/var/lib/mysql 
+      - .tmp/maria-data:/var/lib/mysql 
     environment:
       MARIADB_ROOT_PASSWORD: mariadb
     networks:
@@ -35,11 +35,11 @@ services:
       - 16010:16010
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - /tmp/hadoop:/data/hadoop
-      - /tmp/hadoop_logs:/usr/local/hadoop/logs
-      - /tmp/hbase_logs/master:/usr/local/hbase/logs
-      - /tmp/hive_logs:/usr/local/hive/logs
-      - /tmp/sqoop_logs:/usr/local/sqoop/logs
+      - ./tmp/hadoop:/data/hadoop
+      - ./tmp/hadoop_logs:/usr/local/hadoop/logs
+      - ./tmp/hbase_logs/master:/usr/local/hbase/logs
+      - ./tmp/hive_logs:/usr/local/hive/logs
+      - ./tmp/sqoop_logs:/usr/local/sqoop/logs
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.3
@@ -59,7 +59,7 @@ services:
       - 16030:16030
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - /tmp/hbase_logs/slave1:/usr/local/hbase/logs
+      - ./tmp/hbase_logs/slave1:/usr/local/hbase/logs
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.4
@@ -79,7 +79,7 @@ services:
       - 16031:16030
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - /tmp/hbase_logs/slave2:/usr/local/hbase/logs
+      - ./tmp/hbase_logs/slave2:/usr/local/hbase/logs
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.5
@@ -99,7 +99,7 @@ services:
       - 16032:16030
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - /tmp/hbase_logs/slave3:/usr/local/hbase/logs
+      - ./tmp/hbase_logs/slave3:/usr/local/hbase/logs
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.6
