@@ -16,4 +16,7 @@ def hdfs_set_replication_level(number):
 #hdfs_upload("covid.csv")
 #hdfs_upload("steam_dataset")
 hdfs_upload("test.txt")
+hdfs_upload("steam_spy_basic.jsonl")
+hdfs_upload("steam_spy_basic2.jsonl")
+hdfs_upload("steam_spy_basic3.jsonl")
 hdfs_set_replication_level(4)

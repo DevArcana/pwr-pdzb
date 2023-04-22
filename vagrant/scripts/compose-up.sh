@@ -64,6 +64,7 @@ do
     privileged: true
     ports:
       - '$((16029 + $slave))':16030
+      - '$((8043 + $slave))':8042
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - '$hbase_log_path'/slave'$slave':/usr/local/hbase/logs
