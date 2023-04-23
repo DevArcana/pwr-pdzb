@@ -47,7 +47,7 @@ object ConvertFiles {
 
   def main(args: Array[String]): Unit = {
     steam_spy()
-    //steam_data()
+    steam_data()
 
   }
 
