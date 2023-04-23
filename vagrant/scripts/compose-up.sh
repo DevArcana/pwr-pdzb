@@ -122,7 +122,7 @@ $ip_addr
       - $hbase_log_path/master:/usr/local/hbase/logs
       - $hive_log_path:/usr/local/hive/logs
       - $sqoop_log_path:/usr/local/sqoop/logs
-      - /vagrant/master_volume:/data/master_volume
+      - ../master_volume:/data/master_volume
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.3
