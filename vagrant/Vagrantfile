@@ -9,12 +9,18 @@ Vagrant.configure("2") do |config|
   config.vm.network "private_network", ip:"192.168.56.10"
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = 4096
+    v.memory = 10240
     v.cpus = 4
   end
 
   config.vm.network "forwarded_port", guest: 8088, host: 8088
+  config.vm.network "forwarded_port", guest: 8042, host: 8042
+  config.vm.network "forwarded_port", guest: 8043, host: 8043
+  config.vm.network "forwarded_port", guest: 8044, host: 8044
+  config.vm.network "forwarded_port", guest: 8045, host: 8045
+  config.vm.network "forwarded_port", guest: 8046, host: 8046
   config.vm.network "forwarded_port", guest: 9870, host: 9870
+  config.vm.network "forwarded_port", guest: 8888, host: 8888
   config.vm.box = "bento/ubuntu-20.04"
   config.vm.provision "shell", path: "init.sh"
 end

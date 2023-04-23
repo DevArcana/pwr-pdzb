@@ -64,6 +64,7 @@ do
     privileged: true
     ports:
       - '$((16029 + $slave))':16030
+      - '$((8043 + $slave))':8042
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - '$hbase_log_path'/slave'$slave':/usr/local/hbase/logs
@@ -121,6 +122,7 @@ $ip_addr
       - $hbase_log_path/master:/usr/local/hbase/logs
       - $hive_log_path:/usr/local/hive/logs
       - $sqoop_log_path:/usr/local/sqoop/logs
+      - ../master_volume:/data/master_volume
     networks:
       hadoop-cluster:
         ipv4_address: 10.1.2.3
