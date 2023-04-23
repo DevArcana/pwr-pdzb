@@ -3,7 +3,7 @@ __pycache__/
 venv
 .env
 .DS_Store
-kaggle.json
+vagrant/sprawozdania/akwizycja/kaggle.json
 .idea
 regionservers
 workers
