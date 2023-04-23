@@ -1,7 +1,7 @@
-import model.{SteamJoinedRow, SteamSpyRow, SteamStoreRow}
+import model.{SteamJoined, SteamJoinedRow, SteamSpy, SteamSpyRow, SteamStore, SteamStoreRow}
 
 import java.io.IOException
-import java.util.StringTokenizer
+import java.util.{StringTokenizer, UUID}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.IntWritable
@@ -45,8 +45,6 @@ def runZIO[E, A](f: ZIO[Any, E, A]) = Unsafe.unsafe { implicit unsafe =>
 }*/
 
 object JoinSteamDatasets {
-  object TokenizerMapper { private val one = new IntWritable(1) }
-
   private val logger = Logger.getLogger(classOf[Nothing])
 
   class SteamStoreOrSpyMapper extends Mapper[AnyRef, Text, Text, Text] {
@@ -54,27 +52,45 @@ object JoinSteamDatasets {
       val steamSpyStream   = ZStream.from(value.toString.toList) >>> SteamSpyRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
       val steamStoreStream = ZStream.from(value.toString.toList) >>> SteamStoreRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
 
-      val steamSpyRows   = runZIO(steamSpyStream.runCollect.orElse(ZIO.succeed(Chunk.empty)))
-      val steamStoreRows = runZIO(steamStoreStream.runCollect.orElse(ZIO.succeed(Chunk.empty)))
+      val steamSpyRows   = runZIO(steamSpyStream.take(10).runCollect.orElse(ZIO.succeed(Chunk.empty)))
+      val steamStoreRows = runZIO(steamStoreStream.take(10).runCollect.orElse(ZIO.succeed(Chunk.empty)))
 
-      steamSpyRows.foreach(x => {
-        context.write(Text(x.appid.toString), Text(SteamSpyRow.encoder.encodeJson(x).toString))
-      })
+      steamSpyRows
+        .foreach(x => {
+          context.write(Text(x.value.appid.toString), Text(SteamSpy.encoder.encodeJson(x.value).toString))
+        })
 
-      steamStoreRows.foreach(x => {
-        context.write(Text(x.steam_appid), Text(SteamStoreRow.encoder.encodeJson(x).toString))
-      })
+      steamStoreRows
+        .foreach(x => {
+          context.write(Text(x.value.steam_appid.toString), Text(SteamStore.encoder.encodeJson(x.value).toString))
+        })
     }
   }
 
   class ReduceSteamDatasets extends Reducer[Text, Text, Text, Text] {
     override def reduce(key: Text, values: lang.Iterable[Text], context: Reducer[Text, Text, Text, Text]#Context): Unit = {
-      import collection.convert.ImplicitConversionsToScala._
+      // import collection.convert.ImplicitConversionsToScala._
+      import scala.jdk.CollectionConverters._
+      import scala.jdk.javaapi.FunctionConverters._
+
+      val javaVals = Utils.convert(values)
+      val vals     = javaVals.asScala.toList
+
+      /*      context.write(
+        Text(UUID.randomUUID().toString),
+        Text(
+          s"""
+            | key: ${key.toString}
+            | valsSize: ${vals.size}
+            | vals: ${vals.toString}
+            |""".stripMargin
+        )
+      )*/
 
       // There are max 2 rows per key
       // Something might be missing though
-      val steamSpyRowOpt  = values.map(x => SteamSpyRow.decoder.decodeJson(x.toString)).filter(_.isRight).map(_.toOption.get).headOption
-      val steamDataRowOpt = values.map(x => SteamStoreRow.decoder.decodeJson(x.toString)).filter(_.isRight).map(_.toOption.get).headOption
+      val steamSpyRowOpt  = vals.map(_.toString).flatMap(x => SteamSpy.decoder.decodeJson(x).toOption).headOption
+      val steamDataRowOpt = vals.map(_.toString).flatMap(x => SteamStore.decoder.decodeJson(x).toOption).headOption
 
       if (steamSpyRowOpt.isEmpty || steamDataRowOpt.isEmpty) {
         logger.error(s"Missing data for key: ${key.toString}")
@@ -84,7 +100,7 @@ object JoinSteamDatasets {
       val steamSpyRow  = steamSpyRowOpt.get
       val steamDataRow = steamDataRowOpt.get
 
-      val result = SteamJoinedRow(
+      val result = SteamJoined(
         steamSpyRow.appid,
         steamSpyRow.name,
         steamSpyRow.positive,
@@ -94,7 +110,7 @@ object JoinSteamDatasets {
         steamDataRow.release_date.date
       )
 
-      context.write(key, Text(SteamJoinedRow.encoder.encodeJson(result).toString))
+      context.write(key, Text(SteamJoined.encoder.encodeJson(result).toString))
     }
   }
 
@@ -104,10 +120,10 @@ object JoinSteamDatasets {
 
     job.setJarByClass(classOf[JoinSteamDatasets.type])
     job.setMapperClass(classOf[JoinSteamDatasets.SteamStoreOrSpyMapper])
-    job.setCombinerClass(classOf[JoinSteamDatasets.ReduceSteamDatasets])
+    // job.setCombinerClass(classOf[JoinSteamDatasets.ReduceSteamDatasets])
     job.setReducerClass(classOf[JoinSteamDatasets.ReduceSteamDatasets])
     job.setOutputKeyClass(classOf[Text])
-    job.setOutputValueClass(classOf[IntWritable])
+    job.setOutputValueClass(classOf[Text])
 
     val steamSpyPath   = new Path(args(0))
     val steamStorePath = new Path(args(1))

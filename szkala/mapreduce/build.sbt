@@ -14,4 +14,4 @@ lazy val root = project
     libraryDependencies += "dev.zio"          %% "zio-json"      % "0.5.0"
   )
 
-assembly / mainClass := Some("WordCount")
+assembly / mainClass := Some("JoinSteamDatasets")

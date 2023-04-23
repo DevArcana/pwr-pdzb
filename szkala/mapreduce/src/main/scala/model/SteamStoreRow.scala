@@ -11,9 +11,18 @@ object ReleaseDate   {
   implicit val encoder: JsonEncoder[ReleaseDate] = DeriveJsonEncoder.gen[ReleaseDate]
 }
 
-case class SteamStoreRow(
-    steam_appid: String,
+case class SteamStore(
+    steam_appid: Int,
     release_date: ReleaseDate
+)
+object SteamStore    {
+  implicit val decoder: JsonDecoder[SteamStore] = DeriveJsonDecoder.gen[SteamStore]
+  implicit val encoder: JsonEncoder[SteamStore] = DeriveJsonEncoder.gen[SteamStore]
+}
+
+case class SteamStoreRow(
+    key: String,
+    value: SteamStore
 )
 object SteamStoreRow {
   implicit val decoder: JsonDecoder[SteamStoreRow] = DeriveJsonDecoder.gen[SteamStoreRow]

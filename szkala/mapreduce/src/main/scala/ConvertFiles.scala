@@ -1,3 +1,4 @@
+/*
 import zio.stream.{ZPipeline, ZStream}
 
 import java.nio.file.Files
@@ -52,3 +53,4 @@ object ConvertFiles {
   }
 
 }
+*/
