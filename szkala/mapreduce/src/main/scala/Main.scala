@@ -1,3 +1,5 @@
+import model.{SteamJoinedRow, SteamSpyRow, SteamStoreRow}
+
 import java.io.IOException
 import java.util.StringTokenizer
 import org.apache.hadoop.conf.Configuration
@@ -7,8 +9,7 @@ import org.apache.hadoop.io.Text
 import org.apache.hadoop.mapreduce.Job
 import org.apache.hadoop.mapreduce.Mapper
 import org.apache.hadoop.mapreduce.Reducer
-import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat
+import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, MultipleInputs, NLineInputFormat, TextInputFormat}
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat
 import org.apache.log4j.Logger
 import zio.*
@@ -43,71 +44,57 @@ def runZIO[E, A](f: ZIO[Any, E, A]) = Unsafe.unsafe { implicit unsafe =>
   "ccu": 612293
 }*/
 
-case class ScoreRank(raw: String) {}
-
-object ScoreRank {
-  implicit val decoder: JsonDecoder[ScoreRank] = JsonDecoder[String].orElse(JsonDecoder[Int].map(_.toString)).map(x => ScoreRank(x))
-}
-
-case class SteamSpyRow(
-    appid: Int,
-    name: String,
-    developer: String,
-    publisher: String,
-    score_rank: ScoreRank,
-    positive: Int,
-    negative: Int,
-    userscore: Int,
-    owners: String,
-    average_forever: Int,
-    average_2weeks: Int,
-    median_forever: Int,
-    median_2weeks: Int,
-    price: Option[String],
-    initialprice: Option[String],
-    discount: Option[String],
-    ccu: Int
-) {}
-object SteamSpyRow {
-  implicit val decoder: JsonDecoder[SteamSpyRow] = DeriveJsonDecoder.gen[SteamSpyRow]
-  //implicit val encoder: JsonEncoder[SteamSpyRow] = DeriveJsonEncoder.gen[SteamSpyRow]
-}
-
-object WordCount {
+object JoinSteamDatasets {
   object TokenizerMapper { private val one = new IntWritable(1) }
 
   private val logger = Logger.getLogger(classOf[Nothing])
 
-  class TokenizerMapper extends Mapper[AnyRef, Text, Text, IntWritable]       {
-    private val word = new Text
+  class SteamStoreOrSpyMapper extends Mapper[AnyRef, Text, Text, Text] {
+    override def map(key: AnyRef, value: Text, context: Mapper[AnyRef, Text, Text, Text]#Context) = {
+      val steamSpyStream   = ZStream.from(value.toString.toList) >>> SteamSpyRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
+      val steamStoreStream = ZStream.from(value.toString.toList) >>> SteamStoreRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
 
-    override def map(key: AnyRef, value: Text, context: Mapper[AnyRef, Text, Text, IntWritable]#Context) = {
-      val itr = new StringTokenizer(value.toString)
+      val steamSpyRows   = runZIO(steamSpyStream.runCollect.orElse(ZIO.succeed(Chunk.empty)))
+      val steamStoreRows = runZIO(steamStoreStream.runCollect.orElse(ZIO.succeed(Chunk.empty)))
 
-      val stream = ZStream.from(value.toString.toList)
-      val mapped = stream >>> SteamSpyRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
+      steamSpyRows.foreach(x => {
+        context.write(Text(x.appid.toString), Text(SteamSpyRow.encoder.encodeJson(x).toString))
+      })
 
-      val a = runZIO(for {
-        result <- mapped.runCollect
-      } yield result)
-
-      a.foreach(x => {
-        context.write(Text(x.appid.toString), TokenizerMapper.one)
+      steamStoreRows.foreach(x => {
+        context.write(Text(x.steam_appid), Text(SteamStoreRow.encoder.encodeJson(x).toString))
       })
     }
   }
-  class IntSumReducer   extends Reducer[Text, IntWritable, Text, IntWritable] {
-    private val result = new IntWritable
 
-    override def reduce(key: Text, values: lang.Iterable[IntWritable], context: Reducer[Text, IntWritable, Text, IntWritable]#Context) = {
+  class ReduceSteamDatasets extends Reducer[Text, Text, Text, Text] {
+    override def reduce(key: Text, values: lang.Iterable[Text], context: Reducer[Text, Text, Text, Text]#Context): Unit = {
       import collection.convert.ImplicitConversionsToScala._
 
-      val a = runZIO(
-        ZStream.from(values.toList).map(x => x.get()).runSum
+      // There are max 2 rows per key
+      // Something might be missing though
+      val steamSpyRowOpt  = values.map(x => SteamSpyRow.decoder.decodeJson(x.toString)).filter(_.isRight).map(_.toOption.get).headOption
+      val steamDataRowOpt = values.map(x => SteamStoreRow.decoder.decodeJson(x.toString)).filter(_.isRight).map(_.toOption.get).headOption
+
+      if (steamSpyRowOpt.isEmpty || steamDataRowOpt.isEmpty) {
+        logger.error(s"Missing data for key: ${key.toString}")
+        return
+      }
+
+      val steamSpyRow  = steamSpyRowOpt.get
+      val steamDataRow = steamDataRowOpt.get
+
+      val result = SteamJoinedRow(
+        steamSpyRow.appid,
+        steamSpyRow.name,
+        steamSpyRow.positive,
+        steamSpyRow.negative,
+        steamSpyRow.owners,
+        steamSpyRow.ccu,
+        steamDataRow.release_date.date
       )
 
-      result.set(a)
-      context.write(key, result)
+      context.write(key, Text(SteamJoinedRow.encoder.encodeJson(result).toString))
     }
   }
 
@@ -115,18 +102,21 @@ object WordCount {
     val conf = new Configuration
     val job  = Job.getInstance(conf, "word count")
 
-    job.setJarByClass(classOf[WordCount.type])
-    job.setMapperClass(classOf[WordCount.TokenizerMapper])
-    job.setCombinerClass(classOf[WordCount.IntSumReducer])
-    job.setReducerClass(classOf[WordCount.IntSumReducer])
+    job.setJarByClass(classOf[JoinSteamDatasets.type])
+    job.setMapperClass(classOf[JoinSteamDatasets.SteamStoreOrSpyMapper])
+    job.setCombinerClass(classOf[JoinSteamDatasets.ReduceSteamDatasets])
+    job.setReducerClass(classOf[JoinSteamDatasets.ReduceSteamDatasets])
     job.setOutputKeyClass(classOf[Text])
     job.setOutputValueClass(classOf[IntWritable])
 
-    // job.setInputFormatClass(classOf[NLineInputFormat])
-    FileInputFormat.addInputPath(job, new Path(args(0)))
-    // job.getConfiguration.setInt("mapreduce.input.lineinputformat.linespermap", 1)
+    val steamSpyPath   = new Path(args(0))
+    val steamStorePath = new Path(args(1))
+    // FileInputFormat.addInputPaths(job, new Path(args(0)))
+    MultipleInputs.addInputPath(job, steamSpyPath, classOf[TextInputFormat], classOf[SteamStoreOrSpyMapper])
+    MultipleInputs.addInputPath(job, steamStorePath, classOf[TextInputFormat], classOf[SteamStoreOrSpyMapper])
 
-    FileOutputFormat.setOutputPath(job, new Path(args(1)))
+    FileOutputFormat.setOutputPath(job, new Path(args(2)))
+
     java.lang.System.exit(
       if (job.waitForCompletion(true)) 0
       else 1
