@@ -8,3 +8,4 @@ vagrant/sprawozdania/akwizycja/kaggle.json
 regionservers
 workers
 tmp
+vagrant/scripts/docker-compose.yml
