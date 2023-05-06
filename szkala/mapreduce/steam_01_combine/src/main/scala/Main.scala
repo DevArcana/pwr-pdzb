@@ -17,6 +17,8 @@ import zio.stream.*
 import zio.json.*
 
 import java.lang
+import java.text.SimpleDateFormat
+import scala.util.{Failure, Success, Try}
 
 val runtime = Runtime.default;
 
@@ -49,10 +51,10 @@ object JoinSteamDatasets {
 
   class SteamStoreOrSpyMapper extends Mapper[AnyRef, Text, Text, Text] {
     override def map(key: AnyRef, value: Text, context: Mapper[AnyRef, Text, Text, Text]#Context) = {
-      val steamSpyStream   = ZStream.from(value.toString.toList) >>> SteamSpyRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
+      val steamSpyStream = ZStream.from(value.toString.toList) >>> SteamSpyRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
       val steamStoreStream = ZStream.from(value.toString.toList) >>> SteamStoreRow.decoder.decodeJsonPipeline(JsonStreamDelimiter.Newline)
 
-      val steamSpyRows   = runZIO(steamSpyStream.take(10).runCollect.orElse(ZIO.succeed(Chunk.empty)))
+      val steamSpyRows = runZIO(steamSpyStream.take(10).runCollect.orElse(ZIO.succeed(Chunk.empty)))
       val steamStoreRows = runZIO(steamStoreStream.take(10).runCollect.orElse(ZIO.succeed(Chunk.empty)))
 
       steamSpyRows
@@ -68,13 +70,16 @@ object JoinSteamDatasets {
   }
 
   class ReduceSteamDatasets extends Reducer[Text, Text, Text, Text] {
+    private val steamDateFormat = SimpleDateFormat("MMM d, yyyy")
+    private val isoFormat = SimpleDateFormat("yyyy-MM-dd")
+
     override def reduce(key: Text, values: lang.Iterable[Text], context: Reducer[Text, Text, Text, Text]#Context): Unit = {
       // import collection.convert.ImplicitConversionsToScala._
       import scala.jdk.CollectionConverters._
       import scala.jdk.javaapi.FunctionConverters._
 
       val javaVals = Utils.convert(values)
-      val vals     = javaVals.asScala.toList
+      val vals = javaVals.asScala.toList
 
       /*      context.write(
         Text(UUID.randomUUID().toString),
@@ -89,7 +94,7 @@ object JoinSteamDatasets {
 
       // There are max 2 rows per key
       // Something might be missing though
-      val steamSpyRowOpt  = vals.map(_.toString).flatMap(x => SteamSpy.decoder.decodeJson(x).toOption).headOption
+      val steamSpyRowOpt = vals.map(_.toString).flatMap(x => SteamSpy.decoder.decodeJson(x).toOption).headOption
       val steamDataRowOpt = vals.map(_.toString).flatMap(x => SteamStore.decoder.decodeJson(x).toOption).headOption
 
       if (steamSpyRowOpt.isEmpty || steamDataRowOpt.isEmpty) {
@@ -97,8 +102,16 @@ object JoinSteamDatasets {
         return
       }
 
-      val steamSpyRow  = steamSpyRowOpt.get
+      val steamSpyRow = steamSpyRowOpt.get
       val steamDataRow = steamDataRowOpt.get
+
+      val date = processDate(steamDataRow.release_date.date) match
+        case Failure(exception) => None
+        case Success(value) => Option[String](value)
+
+      if (date.isEmpty) {
+        return
+      }
 
       val result = SteamJoined(
         steamSpyRow.appid,
@@ -107,16 +120,20 @@ object JoinSteamDatasets {
         steamSpyRow.negative,
         steamSpyRow.owners,
         steamSpyRow.ccu,
-        steamDataRow.release_date.date
+        date.get
       )
 
       context.write(key, Text(SteamJoined.encoder.encodeJson(result).toString))
     }
+
+
+    private def processDate(date: String) = Try(isoFormat.format(steamDateFormat.parse(date)))
+
   }
 
   def main(args: Array[String]) = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "word count")
+    val job = Job.getInstance(conf, "word count")
 
     job.setJarByClass(classOf[JoinSteamDatasets.type])
     job.setMapperClass(classOf[JoinSteamDatasets.SteamStoreOrSpyMapper])
@@ -124,7 +141,7 @@ object JoinSteamDatasets {
     job.setOutputKeyClass(classOf[Text])
     job.setOutputValueClass(classOf[Text])
 
-    val steamSpyPath   = new Path(args(0))
+    val steamSpyPath = new Path(args(0))
     val steamStorePath = new Path(args(1))
     // FileInputFormat.addInputPaths(job, new Path(args(0)))
     MultipleInputs.addInputPath(job, steamSpyPath, classOf[TextInputFormat], classOf[SteamStoreOrSpyMapper])
