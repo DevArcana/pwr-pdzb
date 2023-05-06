@@ -15,7 +15,7 @@ import zio.stream.*
 import zio.json.*
 
 import java.lang
-import java.time.{LocalDate, ZoneId}
+import java.time.{LocalDate, YearMonth, ZoneId}
 
 case class TimeDataRaw(date: String)
 object TimeDataRaw {
@@ -72,15 +72,58 @@ object Main {
           (java.time.Instant.ofEpochMilli(x.timestamp).atZone(ZoneId.of("UTC")).toLocalDate, input.game_id, x.count)
         })
 
-        byDay.foreach(x => {
+        val dupValues = byDay
+          .flatMap(x => {
+            val day       = x._1
+            val gameId    = x._2
+            val playCount = x._3
+
+            val ym                    = YearMonth.of(day.getYear, day.getMonthValue)
+            val firstOfMonth          = ym.atDay(1)
+            val firstOfFollowingMonth = ym.plusMonths(1).atDay(1)
+            val daysInMonth           = LazyList
+              .iterate(firstOfMonth)(d => d.plusDays(1))
+              .take(java.time.temporal.ChronoUnit.DAYS.between(firstOfMonth, firstOfFollowingMonth).toInt)
+              .toList
+
+            daysInMonth.map(y => (y, (gameId, playCount)))
+          })
+          .toMap
+
+        val trueValues = byDay
+          .map(x => {
+            val day       = x._1
+            val gameId    = x._2
+            val playCount = x._3
+
+            (day, (gameId, playCount))
+          })
+          .toMap
+
+        val rangeStart = byDay.map(_._1).min
+        val rangeEnd   = byDay.map(_._1).max
+        val allDays    = LazyList.iterate(rangeStart)(d => d.plusDays(1)).takeWhile(d => !d.isAfter(rangeEnd)).toList
+
+        val trueDays = allDays.map(x => {
+          if trueValues.contains(x) then (x, Some(trueValues(x)._1, trueValues(x)._2))
+          (x, None)
+        })
+
+        val filledDays = trueDays.map(x => {
+          val date  = x._1
+          val value = x._2
+
+          if value.isDefined then (date, value.get)
+          else (date, dupValues(date))
+        })
+
+        filledDays.foreach(x => {
           val day       = x._1
-          val gameId    = x._2
-          val playCount = x._3
+          val gameId    = x._2._1
+          val playCount = x._2._2
           emit(new Text(day.toJson), new Text(MapperResult(gameId, playCount).toJson))
         })
       }
-
-
 
       val timeDataOpt = value.toString.dropWhile(!_.isWhitespace).fromJson[TimeDataRaw].toOption
       if (timeDataOpt.isDefined) {

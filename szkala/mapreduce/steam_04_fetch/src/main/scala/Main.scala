@@ -66,7 +66,7 @@ object Main {
 
   class MyReducer extends HadoopJob.HadoopReducer[Text, Text, Text] {
     override def myReduce(key: Text, values: List[String], emit: (Text, Text) => Unit): Unit = {
-      emit(key, Text(values.toString()))
+      values.foreach(x => emit(key, Text(x)))
     }
   }
 
