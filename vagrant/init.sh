@@ -36,10 +36,10 @@ Description=Jupyter Workplace
 [Service]
 Type=simple
 PIDFile=/run/jupyter.pid
-ExecStart=jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --NotebookApp.token= --NotebookApp.password='' --notebook-dir=/vagrant/sprawozdania/akwizycja
+ExecStart=jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --NotebookApp.token= --NotebookApp.password='' --notebook-dir=/vagrant/sprawozdania
 User=vagrant
 Group=vagrant
-WorkingDirectory=/vagrant/sprawozdania/akwizycja
+WorkingDirectory=/vagrant/sprawozdania
 Restart=always
 RestartSec=10
 [Install]

@@ -1,13 +1,26 @@
 val scala3Version = "3.2.2"
 
 lazy val root =
-  project.aggregate(steam_01_combine, steam_02_choose, steam_03_takeN, steam_04_fetch, steam_05_merge_time, covid_01, covid_02, covid_03, final_join, shared)
+  project.aggregate(
+    steam_01_combine,
+    steam_02_choose,
+    steam_03_takeN,
+    steam_04_fetch,
+    steam_05_merge_time,
+    covid_01,
+    covid_02,
+    covid_03,
+    final_join,
+    shared
+  )
 
 lazy val steam_01_combine = project
   .in(file("steam_01_combine"))
   .settings(
-    assembly / mainClass := Some("JoinSteamDatasets"),
-    name                 := "steam_01_combine",
+    name                          := "steam_01_combine",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("JoinSteamDatasets"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -15,8 +28,10 @@ lazy val steam_01_combine = project
 lazy val steam_02_choose = project
   .in(file("steam_02_choose"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "steam_02_choose",
+    name                          := "steam_02_choose",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -24,8 +39,10 @@ lazy val steam_02_choose = project
 lazy val steam_03_takeN = project
   .in(file("steam_03_takeN"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "steam_03_takeN",
+    name                          := "steam_03_takeN",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -33,8 +50,10 @@ lazy val steam_03_takeN = project
 lazy val steam_04_fetch = project
   .in(file("steam_04_fetch"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "steam_04_fetch",
+    name                          := "steam_04_fetch",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -42,8 +61,10 @@ lazy val steam_04_fetch = project
 lazy val steam_05_merge_time = project
   .in(file("steam_05_merge_time"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "steam_04_merge_time",
+    name                          := "steam_05_merge_time",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -51,8 +72,10 @@ lazy val steam_05_merge_time = project
 lazy val covid_01 = project
   .in(file("covid_01"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "covid_01",
+    name                          := "covid_01",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -60,8 +83,10 @@ lazy val covid_01 = project
 lazy val covid_02 = project
   .in(file("covid_02"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "covid_02",
+    name                          := "covid_02",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -69,8 +94,21 @@ lazy val covid_02 = project
 lazy val covid_03 = project
   .in(file("covid_03"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "covid_03",
+    name                          := "covid_03",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
+    commonSettings
+  )
+  .dependsOn(shared)
+
+lazy val youtube_01 = project
+  .in(file("youtube_01"))
+  .settings(
+    name                          := "youtube_01",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
@@ -78,8 +116,10 @@ lazy val covid_03 = project
 lazy val final_join = project
   .in(file("final_join"))
   .settings(
-    assembly / mainClass := Some("Main"),
-    name                 := "final_join",
+    name                          := "final_join",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
     commonSettings
   )
   .dependsOn(shared)
