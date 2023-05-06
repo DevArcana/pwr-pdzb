@@ -75,6 +75,15 @@ lazy val covid_03 = project
   )
   .dependsOn(shared)
 
+lazy val youtube_01 = project
+  .in(file("youtube_01"))
+  .settings(
+    assembly / mainClass := Some("Main"),
+    name                 := "youtube_01",
+    commonSettings
+  )
+  .dependsOn(shared)
+
 lazy val final_join = project
   .in(file("final_join"))
   .settings(
