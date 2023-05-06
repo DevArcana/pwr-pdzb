@@ -15,20 +15,23 @@ import zio.stream.*
 import zio.json.*
 
 import java.lang
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-case class Input(
-    date: String,
-    country: String,
-    total_cases: Int,
-    new_cases: Int,
-    total_deaths: Int,
-    new_deaths: Int,
-    new_cases_per_million: Int
+case class InputCovid(
+                       date: String,
+                       country: String,
+                       total_cases: Int,
+                       new_cases: Int,
+                       total_deaths: Int,
+                       new_deaths: Int,
+                       covid_spread_speed: Float,
+                       average_global_new_cases_per_million: Float
 )
 
-object Input {
-  implicit val decoder: JsonDecoder[Input] = DeriveJsonDecoder.gen[Input]
-  implicit val encoder: JsonEncoder[Input] = DeriveJsonEncoder.gen[Input]
+object InputCovid {
+  implicit val decoder: JsonDecoder[InputCovid] = DeriveJsonDecoder.gen[InputCovid]
+  implicit val encoder: JsonEncoder[InputCovid] = DeriveJsonEncoder.gen[InputCovid]
 }
 
 case class Output(
@@ -38,6 +41,7 @@ case class Output(
     new_cases: Int,
     total_deaths: Int,
     new_deaths: Int,
+    covid_spread_speed: Float,
     average_global_new_cases_per_million: Float
 )
 
@@ -48,38 +52,39 @@ object Output {
 
 object Main {
   class MyMapper extends HadoopJob.HadoopMapper[AnyRef, Text, Text, Text] {
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     override def myMap(key: AnyRef, value: Text, emit: (Text, Text) => Unit): Unit = {
-      val jsons = value.toString.split("\n").map(x => x.dropWhile(!_.isWhitespace)).toList
-      jsons
-        .flatMap(x => Input.decoder.decodeJson(x).toOption)
-        .foreach(x => emit(Text("id"), Text(x.toJson)))
+      value.toString
+        .split("\n")
+        .map(x => x.dropWhile(!_.isWhitespace))
+        .flatMap(x => InputCovid.decoder.decodeJson(x).toOption)
+        .foreach(x => emit(Text(x.date), Text(x.toJson)))
     }
   }
 
   class MyReducer extends HadoopJob.HadoopReducer[Text, Text, Text] {
     override def myReduce(key: Text, values: List[String], emit: (Text, Text) => Unit): Unit = {
-      val inputs = values
-        .flatMap(x => Input.decoder.decodeJson(x).toOption)
+      values
+        .flatMap(x => InputCovid.decoder.decodeJson(x).toOption)
+        .map(x => Output(
+          x.date,
+          x.country,
+          x.total_cases,
+          x.new_cases,
+          x.total_deaths,
+          x.new_deaths,
+          x.covid_spread_speed,
+          x.average_global_new_cases_per_million
+        ))
+        .foreach(x => emit(Text("id"), Text(x.toJson)))
 
-      inputs
-        .map(x =>
-          Output(
-            x.date,
-            x.country,
-            x.total_cases,
-            x.new_cases,
-            x.total_deaths,
-            x.new_deaths,
-            inputs.map(y => y.new_cases_per_million).sum.toFloat / inputs.length
-          )
-        )
-        .foreach(x => emit(key, Text(x.toJson)))
     }
   }
 
   def main(args: Array[String]): Unit = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "covid 01 - choose columns")
+    val job  = Job.getInstance(conf, "final join by date")
 
     job.setJarByClass(classOf[Main.type])
     job.setMapperClass(classOf[MyMapper])

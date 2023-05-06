@@ -16,34 +16,13 @@ import zio.json.*
 
 import java.lang
 
-case class Input(
-    date: String,
-    country: String,
-    total_cases: Int,
-    new_cases: Int,
-    total_deaths: Int,
-    new_deaths: Int,
-    new_cases_per_million: Int
+case class Result(
+    date: String
 )
 
-object Input {
-  implicit val decoder: JsonDecoder[Input] = DeriveJsonDecoder.gen[Input]
-  implicit val encoder: JsonEncoder[Input] = DeriveJsonEncoder.gen[Input]
-}
-
-case class Output(
-    date: String,
-    country: String,
-    total_cases: Int,
-    new_cases: Int,
-    total_deaths: Int,
-    new_deaths: Int,
-    average_global_new_cases_per_million: Float
-)
-
-object Output {
-  implicit val decoder: JsonDecoder[Output] = DeriveJsonDecoder.gen[Output]
-  implicit val encoder: JsonEncoder[Output] = DeriveJsonEncoder.gen[Output]
+object Result {
+  implicit val decoder: JsonDecoder[Result] = DeriveJsonDecoder.gen[Result]
+  implicit val encoder: JsonEncoder[Result] = DeriveJsonEncoder.gen[Result]
 }
 
 object Main {
@@ -51,35 +30,20 @@ object Main {
     override def myMap(key: AnyRef, value: Text, emit: (Text, Text) => Unit): Unit = {
       val jsons = value.toString.split("\n").map(x => x.dropWhile(!_.isWhitespace)).toList
       jsons
-        .flatMap(x => Input.decoder.decodeJson(x).toOption)
+        .flatMap(x => Result.decoder.decodeJson(x).toOption)
         .foreach(x => emit(Text("id"), Text(x.toJson)))
     }
   }
 
   class MyReducer extends HadoopJob.HadoopReducer[Text, Text, Text] {
     override def myReduce(key: Text, values: List[String], emit: (Text, Text) => Unit): Unit = {
-      val inputs = values
-        .flatMap(x => Input.decoder.decodeJson(x).toOption)
-
-      inputs
-        .map(x =>
-          Output(
-            x.date,
-            x.country,
-            x.total_cases,
-            x.new_cases,
-            x.total_deaths,
-            x.new_deaths,
-            inputs.map(y => y.new_cases_per_million).sum.toFloat / inputs.length
-          )
-        )
-        .foreach(x => emit(key, Text(x.toJson)))
+      values.foreach(x => emit(key, Text(x)))
     }
   }
 
   def main(args: Array[String]): Unit = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "covid 01 - choose columns")
+    val job  = Job.getInstance(conf, "covid 02 - extract date")
 
     job.setJarByClass(classOf[Main.type])
     job.setMapperClass(classOf[MyMapper])

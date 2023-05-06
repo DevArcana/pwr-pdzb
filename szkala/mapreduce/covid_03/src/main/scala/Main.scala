@@ -15,6 +15,8 @@ import zio.stream.*
 import zio.json.*
 
 import java.lang
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 case class Input(
     date: String,
@@ -23,7 +25,7 @@ case class Input(
     new_cases: Int,
     total_deaths: Int,
     new_deaths: Int,
-    new_cases_per_million: Int
+    average_global_new_cases_per_million: Float
 )
 
 object Input {
@@ -38,6 +40,7 @@ case class Output(
     new_cases: Int,
     total_deaths: Int,
     new_deaths: Int,
+    covid_spread_speed: Float,
     average_global_new_cases_per_million: Float
 )
 
@@ -48,38 +51,54 @@ object Output {
 
 object Main {
   class MyMapper extends HadoopJob.HadoopMapper[AnyRef, Text, Text, Text] {
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     override def myMap(key: AnyRef, value: Text, emit: (Text, Text) => Unit): Unit = {
-      val jsons = value.toString.split("\n").map(x => x.dropWhile(!_.isWhitespace)).toList
-      jsons
+      value.toString
+        .split("\n")
+        .map(x => x.dropWhile(!_.isWhitespace))
         .flatMap(x => Input.decoder.decodeJson(x).toOption)
-        .foreach(x => emit(Text("id"), Text(x.toJson)))
+        .foreach(x => {
+          val date = LocalDate.parse(x.date, formatter)
+
+          for (n <- Range(0, 8)) {
+            emit(Text(s"${x.country}/${date.plusDays(n).format(formatter)}"), Text(x.toJson))
+          }
+        })
     }
   }
 
   class MyReducer extends HadoopJob.HadoopReducer[Text, Text, Text] {
     override def myReduce(key: Text, values: List[String], emit: (Text, Text) => Unit): Unit = {
-      val inputs = values
+      val list = values
         .flatMap(x => Input.decoder.decodeJson(x).toOption)
+        .sortBy(x => x.date)
+        .reverse
 
-      inputs
-        .map(x =>
-          Output(
-            x.date,
-            x.country,
-            x.total_cases,
-            x.new_cases,
-            x.total_deaths,
-            x.new_deaths,
-            inputs.map(y => y.new_cases_per_million).sum.toFloat / inputs.length
+      list match
+        case head :: tail =>
+          emit(
+            key,
+            Text(
+              Output(
+                head.date,
+                head.country,
+                head.total_cases,
+                head.new_cases,
+                head.total_deaths,
+                head.new_deaths,
+                (tail.map(x => x.new_cases).sum / tail.length.toFloat) / head.new_cases,
+                head.average_global_new_cases_per_million
+              ).toJson
+            )
           )
-        )
-        .foreach(x => emit(key, Text(x.toJson)))
+        case Nil          => ()
     }
   }
 
   def main(args: Array[String]): Unit = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "covid 01 - choose columns")
+    val job  = Job.getInstance(conf, "covid 03 - calculate spread")
 
     job.setJarByClass(classOf[Main.type])
     job.setMapperClass(classOf[MyMapper])
