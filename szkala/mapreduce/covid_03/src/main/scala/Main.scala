@@ -25,7 +25,7 @@ case class Input(
     new_cases: Int,
     total_deaths: Int,
     new_deaths: Int,
-    new_cases_per_million: Int
+    average_global_new_cases_per_million: Float
 )
 
 object Input {
@@ -88,7 +88,7 @@ object Main {
                 head.total_deaths,
                 head.new_deaths,
                 (tail.map(x => x.new_cases).sum / tail.length.toFloat) / head.new_cases,
-                0.0f
+                head.average_global_new_cases_per_million
               ).toJson
             )
           )
@@ -98,7 +98,7 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "covid 02 - extract date")
+    val job  = Job.getInstance(conf, "covid 03 - calculate spread")
 
     job.setJarByClass(classOf[Main.type])
     job.setMapperClass(classOf[MyMapper])
