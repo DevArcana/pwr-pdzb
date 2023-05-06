@@ -43,7 +43,7 @@ lazy val steam_05_merge_time = project
   .in(file("steam_05_merge_time"))
   .settings(
     assembly / mainClass := Some("Main"),
-    name                 := "steam_04_merge_time",
+    name                 := "steam_05_merge_time",
     commonSettings
   )
   .dependsOn(shared)
