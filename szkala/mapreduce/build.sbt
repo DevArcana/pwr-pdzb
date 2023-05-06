@@ -1,6 +1,6 @@
 val scala3Version = "3.2.2"
 
-lazy val root = project.aggregate(steam_01_combine, steam_02_takeN, shared)
+lazy val root = project.aggregate(steam_01_combine, steam_02_takeN, steam_03_fetch, covid_01, shared)
 
 lazy val steam_01_combine = project
   .in(file("steam_01_combine"))
@@ -29,6 +29,15 @@ lazy val steam_03_fetch = project
   )
   .dependsOn(shared)
 
+lazy val covid_01 = project
+  .in(file("covid_01"))
+  .settings(
+    assembly / mainClass := Some("Main"),
+    name                 := "covid_01",
+    commonSettings
+  )
+  .dependsOn(shared)
+
 lazy val shared = project
   .in(file("shared"))
   .settings(
@@ -46,13 +55,11 @@ lazy val commonSettings = Seq(
   libraryDependencies += "dev.zio"          %% "zio-streams"   % "2.0.13",
   libraryDependencies += "dev.zio"          %% "zio-json"      % "0.5.0",
   libraryDependencies += "dev.zio"          %% "zio-http"      % "3.0.0-RC1",
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.11" % Test,
-
-  assemblyMergeStrategy in assembly := {
+  libraryDependencies += "org.scalatest"    %% "scalatest"     % "3.2.11" % Test,
+  assemblyMergeStrategy in assembly         := {
     case x if x.contains("io.netty") => MergeStrategy.discard
-    case x =>
+    case x                           =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
   }
 )
-
