@@ -1,6 +1,6 @@
 val scala3Version = "3.2.2"
 
-lazy val root = project.aggregate(steam_01_combine, steam_02_takeN, steam_03_fetch, covid_01, shared)
+lazy val root = project.aggregate(steam_01_combine, steam_03_takeN, steam_04_fetch, covid_01, shared)
 
 lazy val steam_01_combine = project
   .in(file("steam_01_combine"))
@@ -11,20 +11,20 @@ lazy val steam_01_combine = project
   )
   .dependsOn(shared)
 
-lazy val steam_02_takeN = project
-  .in(file("steam_02_takeN"))
+lazy val steam_03_takeN = project
+  .in(file("steam_03_takeN"))
   .settings(
     assembly / mainClass := Some("Main"),
-    name                 := "steam_02_takeN",
+    name                 := "steam_03_takeN",
     commonSettings
   )
   .dependsOn(shared)
 
-lazy val steam_03_fetch = project
-  .in(file("steam_03_fetch"))
+lazy val steam_04_fetch = project
+  .in(file("steam_04_fetch"))
   .settings(
     assembly / mainClass := Some("Main"),
-    name                 := "steam_03_fetch",
+    name                 := "steam_04_fetch",
     commonSettings
   )
   .dependsOn(shared)
