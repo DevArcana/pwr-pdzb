@@ -59,7 +59,7 @@ object Main {
       ).map(x => Result(x._1.game_id, x._2.map(y => PlayCount(y.head, y.last))))
 
       result.foreach { x =>
-        emit(new Text(x.game_id.toString), Text(x.playcounts.toJson))
+        emit(new Text(x.game_id.toString), Text(x.toJson))
       }
     }
   }

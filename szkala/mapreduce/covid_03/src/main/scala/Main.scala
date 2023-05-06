@@ -75,6 +75,8 @@ object Main {
         .sortBy(x => x.date)
         .reverse
 
+      //emit(Text("debug"), Text(values.toString()))
+
       list match
         case head :: tail =>
           emit(

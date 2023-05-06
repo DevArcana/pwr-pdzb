@@ -80,12 +80,16 @@ object Main {
         })
       }
 
-      if (value.toString.fromJson[TimeDataRaw].toOption.isDefined) {
-        handleTimeData(value.toString.fromJson[TimeDataRaw].toOption.get)
+
+
+      val timeDataOpt = value.toString.dropWhile(!_.isWhitespace).fromJson[TimeDataRaw].toOption
+      if (timeDataOpt.isDefined) {
+        handleTimeData(timeDataOpt.get)
       }
 
-      if (value.toString.fromJson[SteamInput].toOption.isDefined) {
-        handleSteamData(value.toString.fromJson[SteamInput].toOption.get)
+      val steamDataOpt = value.toString.dropWhile(!_.isWhitespace).fromJson[SteamInput].toOption
+      if (steamDataOpt.isDefined) {
+        handleSteamData(steamDataOpt.get)
       }
     }
   }
@@ -99,6 +103,8 @@ object Main {
 
       val date       = key.toString.fromJson[LocalDate].toOption.get
       val playCounts = values.filterNot(_ == "include").map(x => x.fromJson[MapperResult].toOption.get)
+
+      if (playCounts.isEmpty) return;
 
       emit(
         Text("id"),
@@ -116,7 +122,7 @@ object Main {
 
   def main(args: Array[String]) = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "steam04")
+    val job  = Job.getInstance(conf, "steam05")
 
     job.setJarByClass(classOf[Main.type])
     job.setMapperClass(classOf[MyMapper])
@@ -126,7 +132,8 @@ object Main {
 
     job.setInputFormatClass(classOf[TextInputFormat])
     FileInputFormat.addInputPath(job, new Path(args(0)))
-    FileOutputFormat.setOutputPath(job, new Path(args(1)))
+    FileInputFormat.addInputPath(job, new Path(args(1)))
+    FileOutputFormat.setOutputPath(job, new Path(args(2)))
 
     java.lang.System.exit(
       if (job.waitForCompletion(true)) 0
