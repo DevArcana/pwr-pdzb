@@ -11,6 +11,15 @@ lazy val steam_01_combine = project
   )
   .dependsOn(shared)
 
+lazy val steam_02_choose = project
+  .in(file("steam_02_choose"))
+  .settings(
+    assembly / mainClass := Some("Main"),
+    name                 := "steam_02_choose",
+    commonSettings
+  )
+  .dependsOn(shared)
+
 lazy val steam_03_takeN = project
   .in(file("steam_03_takeN"))
   .settings(
