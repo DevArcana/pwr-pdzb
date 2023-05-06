@@ -17,13 +17,7 @@ import zio.json.*
 import java.lang
 
 case class Result(
-    date: String,
-    country: String,
-    total_cases: Int,
-    new_cases: Int,
-    total_deaths: Int,
-    new_deaths: Int,
-    new_cases_per_million: Int
+    date: String
 )
 
 object Result {
@@ -49,7 +43,7 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     val conf = new Configuration
-    val job  = Job.getInstance(conf, "covid 01 - choose columns")
+    val job  = Job.getInstance(conf, "covid 02 - extract date")
 
     job.setJarByClass(classOf[Main.type])
     job.setMapperClass(classOf[MyMapper])
