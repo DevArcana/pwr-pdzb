@@ -46,6 +46,7 @@ lazy val commonSettings = Seq(
   libraryDependencies += "dev.zio"          %% "zio-streams"   % "2.0.13",
   libraryDependencies += "dev.zio"          %% "zio-json"      % "0.5.0",
   libraryDependencies += "dev.zio"          %% "zio-http"      % "3.0.0-RC1",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.11" % Test,
 
   assemblyMergeStrategy in assembly := {
     case x if x.contains("io.netty") => MergeStrategy.discard
