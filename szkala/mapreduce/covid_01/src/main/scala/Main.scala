@@ -16,20 +16,38 @@ import zio.json.*
 
 import java.lang
 
+case class Result(
+    date: String,
+    country: String,
+    total_cases: Int,
+    new_cases: Int,
+    total_deaths: Int,
+    new_deaths: Int,
+    new_cases_per_million: Int
+)
+
+object Result {
+  implicit val decoder: JsonDecoder[Result] = DeriveJsonDecoder.gen[Result]
+  implicit val encoder: JsonEncoder[Result] = DeriveJsonEncoder.gen[Result]
+}
+
 object Main {
   class MyMapper extends HadoopJob.HadoopMapper[AnyRef, Text, Text, Text] {
     override def myMap(key: AnyRef, value: Text, emit: (Text, Text) => Unit): Unit = {
-
+      val jsons = value.toString.split("\n").map(x => x.dropWhile(!_.isWhitespace)).toList
+      jsons
+        .flatMap(x => Result.decoder.decodeJson(x).toOption)
+        .foreach(x => emit(Text("id"), Text(x.toJson)))
     }
   }
 
   class MyReducer extends HadoopJob.HadoopReducer[Text, Text, Text] {
     override def myReduce(key: Text, values: List[String], emit: (Text, Text) => Unit): Unit = {
-
+      values.foreach(x => emit(key, Text(x)))
     }
   }
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
     val conf = new Configuration
     val job  = Job.getInstance(conf, "covid 01")
 
