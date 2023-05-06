@@ -113,6 +113,17 @@ lazy val youtube_01 = project
   )
   .dependsOn(shared)
 
+lazy val youtube_02 = project
+  .in(file("youtube_02"))
+  .settings(
+    name                          := "youtube_02",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
+    commonSettings
+  )
+  .dependsOn(shared)
+
 lazy val final_join = project
   .in(file("final_join"))
   .settings(
