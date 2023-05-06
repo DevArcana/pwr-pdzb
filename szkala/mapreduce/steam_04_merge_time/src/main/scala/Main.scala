@@ -59,6 +59,8 @@ object ReduceResult {
 
 object Main {
   class MyMapper extends HadoopJob.HadoopMapper[AnyRef, Text, Text, Text] {
+    // If the input is date => (date, "include")
+    // If the input is steam => (date, MapperResult)
     override def myMap(key: AnyRef, value: Text, emit: (Text, Text) => Unit): Unit = {
       def handleTimeData(input: TimeDataRaw) = {
         val parsed = TimeData.fromRaw(input)
@@ -89,6 +91,8 @@ object Main {
   }
 
   class MyReducer extends HadoopJob.HadoopReducer[Text, Text, Text] {
+    // If the values contains "include" => calculate
+    // If the values do not contain "include" => do nothing
     override def myReduce(key: Text, values: List[String], emit: (Text, Text) => Unit): Unit = {
       val doInclude = values.contains("include")
       if (!doInclude) return
