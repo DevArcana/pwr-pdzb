@@ -1,6 +1,8 @@
 import org.apache.hadoop.io.Text
 import org.apache.hadoop.mapreduce.{Mapper, Reducer}
-import zio.*
+import zio.{ZIO, *}
+import zio.http.{Client, URL}
+
 
 object HadoopJob {
 
@@ -10,6 +12,14 @@ object HadoopJob {
 
     def runZIO[E, A](f: ZIO[Any, E, A]) = Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe.run(f).getOrThrowFiberFailure()
+    }
+
+    def logRemoteInfo(address: String, msg: String) = {
+      val workflow = for {
+        _ <- ZIO.unit
+        //_ <- Client.request(s"$address/$msg").ignore
+      } yield ()
+      runZIO(workflow.provide(Client.default))
     }
 
     def myMap(key: KIn, value: VIn, emit: (KOut, VOut) => Unit): Unit
@@ -27,6 +37,13 @@ object HadoopJob {
 
     def runZIO[E, A](f: ZIO[Any, E, A]) = Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe.run(f).getOrThrowFiberFailure()
+    }
+
+    def logRemoteInfo(address: String, msg: String) = {
+      val workflow = for {
+        _ <- Client.request(s"$address/$msg").ignore
+      } yield ()
+      runZIO(workflow.provide(Client.default))
     }
 
     override def reduce(
