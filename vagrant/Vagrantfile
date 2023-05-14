@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 8046, host: 8046
   config.vm.network "forwarded_port", guest: 9870, host: 9870
   config.vm.network "forwarded_port", guest: 8888, host: 8888
+  config.vm.network "forwarded_port", guest: 8889, host: 8889
   config.vm.box = "bento/ubuntu-20.04"
   config.vm.provision "shell", path: "init.sh"
 end

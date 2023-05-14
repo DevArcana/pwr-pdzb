@@ -104,7 +104,7 @@ services:
       - "master:10.1.2.3"
 $ip_addr
   master:
-    image: hjben/hadoop-eco:$hadoop_version
+    image: przydasie99/hadoopeco
     hostname: master
     container_name: master
     privileged: true
