@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  #config.vm.box = "bento/ubuntu-20.04"
+  config.vm.box = "archlinux/archlinux"
+
+  config.vm.network "private_network", ip:"192.168.56.10"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 10240
+    v.cpus = 4
+  end
+
+  #config.vagrant.plugins = "vagrant-docker-compose"
+  #config.vm.provision :docker
+  #config.vm.provision :docker_compose
+
+  config.vm.network "forwarded_port", guest: 8088, host: 8088
+  config.vm.network "forwarded_port", guest: 8042, host: 8042
+  config.vm.network "forwarded_port", guest: 8043, host: 8043
+  config.vm.network "forwarded_port", guest: 8044, host: 8044
+  config.vm.network "forwarded_port", guest: 8045, host: 8045
+  config.vm.network "forwarded_port", guest: 8046, host: 8046
+  config.vm.network "forwarded_port", guest: 9870, host: 9870
+  config.vm.network "forwarded_port", guest: 8888, host: 8888
+  config.vm.network "forwarded_port", guest: 8889, host: 8889
+
+  config.vm.provision "shell", path: "init.sh"
+end

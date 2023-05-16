@@ -1,0 +1,2 @@
+lines = LOAD '/datasets/steam-dataset/steam_dataset/steamspy/basic/steam_spy_scrap.jsonl' AS (line: chararray);
+Dump lines
