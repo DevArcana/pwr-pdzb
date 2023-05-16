@@ -1,46 +1,46 @@
 FROM wxwmatt/hadoop-base:2.1.1-hadoop3.3.1-java8
 
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      build-essential \
-      iputils-ping \
-      wget
+# RUN apt-get update
+# RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#       build-essential \
+#       iputils-ping \
+#       wget
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      python3.7-dev \
-      python3.7 \
-      python3-pip
+# RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#       python3.7-dev \
+#       python3.7 \
+#       python3-pip
 
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+# RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-RUN pip3 install wheel
-RUN pip3 install setuptools
-RUN pip3 install py4j
-RUN pip3 install pyspark
-RUN pip3 install numpy
-RUN pip3 install pandas
+# RUN pip3 install wheel
+# RUN pip3 install setuptools
+# RUN pip3 install py4j
+# RUN pip3 install pyspark
+# RUN pip3 install numpy
+# RUN pip3 install pandas
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      gcc \
-      git-core \
-      libffi-dev
+# RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#       gcc \
+#       git-core \
+#       libffi-dev
 
-RUN pip3 install notebook
+# RUN pip3 install notebook
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      libjpeg-dev \
-      libpcre3 \
-      libpcre3-dev \
-      autoconf \
-      libtool \
-      pkg-config\
-      zlib1g-dev \
-      libssl-dev \
-      libexpat1-dev \
-      libxslt1.1\
-      gnuplot
+# RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#       libjpeg-dev \
+#       libpcre3 \
+#       libpcre3-dev \
+#       autoconf \
+#       libtool \
+#       pkg-config\
+#       zlib1g-dev \
+#       libssl-dev \
+#       libexpat1-dev \
+#       libxslt1.1\
+#       gnuplot
 
-RUN pip3 install matplotlib
+# RUN pip3 install matplotlib
 
 HEALTHCHECK CMD curl -f http://localhost:9870/ || exit 1
 
@@ -53,11 +53,19 @@ RUN chmod a+x /run.sh
 
 RUN echo 'root:pass' | chpasswd
 RUN apt-get -y update
-RUN apy-get -y install openssh-client openssh-server
-RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
-RUN service ssh enable
+RUN apt-get -y install openssh-client openssh-server
+RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+RUN service ssh restart
+#RUN systemctl enable ssh
 RUN export -p >env_var.sh
 
 EXPOSE 9870
 
-CMD ["/run.sh"]
+#CMD ["/usr/sbin/sshd","-D"]
+#CMD ["/run.sh"]
+RUN apt-get -y install supervisor
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+CMD ["/usr/bin/supervisord"]
+#CMD ["/run.sh"]
+#CMD  ["/run.sh"]
+#CMD ["sh", "-c", "/usr/sbin/sshd -D ; /run.sh"]
