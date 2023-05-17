@@ -12,6 +12,8 @@ services:
     command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''"
     volumes:
       - ../sprawozdania/:/home/jovyan/
+      - ../master-volume/:/data/master_volume
+
 
   namenode:
     image: przydasie99/hadoop-namenode
