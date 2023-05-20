@@ -69,8 +69,5 @@ RUN cd pig-0.17.0
 RUN mv pig-0.17.0 /usr/local/pig
 ENV PATH="${PATH}:/usr/local/pig/bin"
 
-#COPY env_var.sh /env_var_hadoop.sh
-#RUN export -p > /env_var_path.sh
-
 EXPOSE 9870
 CMD ["/usr/bin/supervisord"]
