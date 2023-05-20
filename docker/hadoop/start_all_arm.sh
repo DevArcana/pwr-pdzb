@@ -1,1 +1,1 @@
-docker compose -f dockere-compose-arm.yml up -d
+docker compose -f docker-compose-arm.yml up -d
