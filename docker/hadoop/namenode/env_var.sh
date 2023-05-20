@@ -30,7 +30,6 @@ declare -x MAPRED_CONF_mapreduce_reduce_memory_mb="8192"
 declare -x MAPRED_CONF_yarn_app_mapreduce_am_env="HADOOP_MAPRED_HOME=/opt/hadoop-3.3.1/"
 declare -x MULTIHOMED_NETWORK="1"
 declare -x OLDPWD
-declare -x PATH="/opt/hadoop-3.3.1/bin/:/usr/local/openjdk-8/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 declare -x PWD="/app"
 declare -x SHLVL="1"
 declare -x SPARK_HOME="/usr/local/lib/python3.7/dist-packages/pyspark"

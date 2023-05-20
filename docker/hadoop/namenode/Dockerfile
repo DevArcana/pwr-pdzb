@@ -56,16 +56,21 @@ RUN apt-get -y update
 RUN apt-get -y install openssh-client openssh-server
 RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 RUN service ssh restart
-#RUN systemctl enable ssh
-RUN export -p >env_var.sh
 
-EXPOSE 9870
-
-#CMD ["/usr/sbin/sshd","-D"]
-#CMD ["/run.sh"]
 RUN apt-get -y install supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN apt-get -y update
+RUN apt-get -y install wget
+
+RUN wget https://downloads.apache.org/pig/pig-0.17.0/pig-0.17.0.tar.gz
+RUN tar -xf pig-0.17.0.tar.gz
+RUN cd pig-0.17.0
+RUN mv pig-0.17.0 /usr/local/pig
+ENV PATH="${PATH}:/usr/local/pig/bin"
+
+#COPY env_var.sh /env_var_hadoop.sh
+#RUN export -p > /env_var_path.sh
+
+EXPOSE 9870
 CMD ["/usr/bin/supervisord"]
-#CMD ["/run.sh"]
-#CMD  ["/run.sh"]
-#CMD ["sh", "-c", "/usr/sbin/sshd -D ; /run.sh"]
