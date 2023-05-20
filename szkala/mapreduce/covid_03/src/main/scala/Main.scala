@@ -108,6 +108,7 @@ object Main {
     job.setOutputKeyClass(classOf[Text])
     job.setOutputValueClass(classOf[Text])
 
+    job.setNumReduceTasks(3)
     job.setInputFormatClass(classOf[TextInputFormat])
     FileInputFormat.addInputPath(job, new Path(args(0)))
     FileOutputFormat.setOutputPath(job, new Path(args(1)))

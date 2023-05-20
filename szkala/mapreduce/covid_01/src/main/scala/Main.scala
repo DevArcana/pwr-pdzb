@@ -120,7 +120,7 @@ object Main {
     job.setReducerClass(classOf[MyReducer])
     job.setOutputKeyClass(classOf[Text])
     job.setOutputValueClass(classOf[Text])
-
+  
     job.setInputFormatClass(classOf[TextInputFormat])
     FileInputFormat.addInputPath(job, new Path(args(0)))
     FileOutputFormat.setOutputPath(job, new Path(args(1)))
