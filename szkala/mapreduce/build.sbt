@@ -10,6 +10,7 @@ lazy val root =
     covid_01,
     covid_02,
     covid_03,
+    covid_03_single_reducer,
     final_join,
     shared
   )
@@ -95,6 +96,17 @@ lazy val covid_03 = project
   .in(file("covid_03"))
   .settings(
     name                          := "covid_03",
+    assembly / assemblyJarName    := s"${name.value}.jar",
+    assembly / mainClass          := Some("Main"),
+    assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),
+    commonSettings
+  )
+  .dependsOn(shared)
+
+lazy val covid_03_single_reducer = project
+  .in(file("covid_03_single_reducer"))
+  .settings(
+    name                          := "covid_03_single_reducer",
     assembly / assemblyJarName    := s"${name.value}.jar",
     assembly / mainClass          := Some("Main"),
     assembly / assemblyOutputPath := file(s"jars/${(assembly / assemblyJarName).value}"),

@@ -9,3 +9,5 @@ regionservers
 workers
 tmp
 vagrant/scripts/docker-compose.yml
+.metals
+.vscode
