@@ -166,7 +166,7 @@ services:
       - ./postgres.env
 
   hive-server:
-    image: liaor/hive:2.3.2-postgresql-metastore
+    image: przydasie99/pwr-hadoop-hive-server:amd64
     build:
       context: hive-europe
       dockerfile: Dockerfile
@@ -184,7 +184,7 @@ services:
       - "10000:10000"
 
   hive-metastore:
-    image: liaor/hive:2.3.2-postgresql-metastore
+    image: przydasie99/pwr-hadoop-hive-server:amd64
     build:
       context: hive-europe
       dockerfile: Dockerfile
@@ -203,7 +203,7 @@ services:
     build:
       context: hive-metastore
       dockerfile: Dockerfile
-    image: bde2020/hive-metastore-postgresql:3.1.0
+    image: przydasie99/pwr-hadoop-hive-postgres:amd64
     container_name: hive-metastore-postgresql
   # volumes:
   #    - ../hive_volume/metastore-postgresql/postgresql/data:/var/lib/postgresql/data
