@@ -1,4 +1,4 @@
-FROM postgres:9.5.3
+FROM postgres:13
 
 MAINTAINER "Ivan Ermilov <ivan.s.ermilov@gmail.com>"
 
