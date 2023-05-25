@@ -165,6 +165,51 @@ services:
     env_file:
       - ./postgres.env
 
+  hive-server:
+    image: liaor/hive:2.3.2-postgresql-metastore
+    build:
+      context: hive-europe
+      dockerfile: Dockerfile
+    container_name: hive-server
+    volumes:
+      - ../master_volume:/data/master_volume
+    env_file:
+      - ./hadoop.env
+    environment:
+      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+    depends_on:
+      - hive-metastore
+    ports:
+      - "10000:10000"
+
+  hive-metastore:
+    image: liaor/hive:2.3.2-postgresql-metastore
+    build:
+      context: hive-europe
+      dockerfile: Dockerfile
+    container_name: hive-metastore
+    env_file:
+      - ./hadoop.env
+    command: /opt/hive/bin/hive --service metastore
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 hive-metastore-postgresql:5432"
+    depends_on:
+      - hive-metastore-postgresql
+    ports:
+      - "9083:9083"
+
+  hive-metastore-postgresql:
+    build:
+      context: hive-metastore
+      dockerfile: Dockerfile
+    image: bde2020/hive-metastore-postgresql:3.1.0
+    container_name: hive-metastore-postgresql
+  # volumes:
+  #    - ../hive_volume/metastore-postgresql/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - '5433:5432'
+
 volumes:
   hadoop_namenode:
   hadoop_datanode:
@@ -172,3 +217,7 @@ volumes:
   hadoop_datanode3:
   hadoop_historyserver:
   postgres_data:
+
+networks:
+  default:
+     name: net
