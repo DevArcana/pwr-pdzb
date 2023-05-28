@@ -1,5 +1,5 @@
-create database if not exists testdb;
-use testdb;
+create database if not exists coviddb;
+use coviddb;
 DROP TABLE IF EXISTS covid;
 CREATE EXTERNAL TABLE IF NOT EXISTS covid (
   event_date DATE,
@@ -13,4 +13,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS covid (
 row format delimited
 fields terminated by ','
 lines terminated by '\n'
-stored as textfile location 'hdfs://namenode:9000/user/hive/warehouse/testdb.db/covid';
+stored as textfile location 'hdfs://namenode:9000/user/hive/warehouse/covid.db/covid';

@@ -1,5 +1,5 @@
-use testdb;
-INSERT OVERWRITE DIRECTORY 'hdfs://namenode:9000/user/hive/warehouse/results'
+use coviddb;
+INSERT OVERWRITE DIRECTORY 'hdfs://namenode:9000/user/hive/warehouse/covid.db/calculated'
 SELECT * FROM (
   WITH transformed_data AS (
     SELECT
