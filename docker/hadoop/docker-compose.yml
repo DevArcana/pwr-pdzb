@@ -205,6 +205,8 @@ services:
       dockerfile: Dockerfile
     image: przydasie99/pwr-hadoop-hive-postgres:amd64
     container_name: hive-metastore-postgresql
+    environment:
+      POSTGRES_PASSWORD: pass
   # volumes:
   #    - ../hive_volume/metastore-postgresql/postgresql/data:/var/lib/postgresql/data
     ports:
