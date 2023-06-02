@@ -83,11 +83,6 @@ SELECT t2.`appid`, t2.`name`, t2.`developer`, t2.`publisher`, t2.`score_rank`, t
             'discount',
             'ccu') t2 as `appid`, `name`, `developer`, `publisher`, `score_rank`, `positive`, `negative`, `userscore`, `owners`, `average_forever`, `average_2weeks`, `median_forever`, `median_2weeks`, `price`, `initialprice`, `discount`, `ccu`;
 
-
-SELECT * FROM steam_spy LIMIT 10;
-SELECT * FROM steam_store LIMIT 10;
-
-
 -- ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZz
 
 -- JOINED TABLE
