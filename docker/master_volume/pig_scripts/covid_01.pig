@@ -12,4 +12,4 @@ data = foreach lines
 grouped = group data all;
 avg = foreach grouped generate AVG(data.new_cases_per_million);
 res = foreach data generate date, location, total_cases, new_cases, total_deaths, new_deaths, new_cases_per_million, avg.$0 AS average_new_cases_per_million;
-STORE res INTO '/testoutput' using JsonStorage();
+STORE res INTO '/pig_output/covid_01/' using JsonStorage();
