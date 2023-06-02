@@ -20,7 +20,7 @@ SELECT * FROM (
     total_deaths,
     new_deaths,
     new_cases_per_million,
-    new_cases_per_million + 1.1
+    avg(new_cases_per_million) OVER () AS average_new_cases_per_million
   FROM transformed_data
 ) t;
 
