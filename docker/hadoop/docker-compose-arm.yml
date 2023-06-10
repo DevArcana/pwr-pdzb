@@ -24,6 +24,7 @@ services:
     ports:
       - 9870:9870
       - 9000:9000
+      - 18080:18080
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - ./jobs:/app
