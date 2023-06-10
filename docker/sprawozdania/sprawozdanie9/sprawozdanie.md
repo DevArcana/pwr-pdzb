@@ -263,14 +263,13 @@ STORE steam_joined INTO '/pig_output/steam_01_combine/' using JsonStorage();
 
 ## Porównanie czasów wykonania
 
-| Platforma | Proces | R1 [s] | R2 [s] |  R3 [s] | Średnia |
-| --------: | -----: | -----: | -----: | ------: | ------: |
-| MapReduce |  Covid | 358.95 | 396.32 |  366.73 |  374.00 |
-| MapReduce |  Steam | 988.93 | 977.61 | 1001.64 |  989.39 |
-|      Hive |  Covid |  54.19 |  53.63 |   52.78 |   53.53 |
-|      Hive |  Steam |  98.25 |  92.69 |   94.82 |   95.25 |
-|       Pig |  Covid |  46.62 |  41.53 |   46.86 |   45.00 |
-|       Pig |  Steam |  34.19 |  29.33 |   34.25 |   32.59 |
+| Platforma | MapReduce |  Hive |   Pig | MapReduce |  Hive |   Pig |
+|----------:|----------:|------:|------:|----------:|------:|------:|
+|    Proces |     Covid | Covid | Covid |     Steam | Steam | Steam |
+|    R1 [s] |    358.95 | 54.19 | 46.62 |    988.93 | 98.25 | 34.19 |
+|    R2 [s] |    396.32 | 53.63 | 41.53 |    977.61 | 92.69 | 29.33 |
+|    R3 [s] |    366.73 | 52.78 | 46.86 |   1001.64 | 94.82 | 34.25 |
+|   Średnia |    374.00 | 53.53 | 45.00 |    989.39 | 95.25 | 32.59 |
 
 | Proces | MapReduce [s] | Hive  [s]      | Pig [s]        |
 | ------ | ------------- | -------------- | -------------- |
