@@ -67,10 +67,12 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN tar -xf pig-0.17.0.tar.gz
 RUN cd pig-0.17.0
 RUN mv pig-0.17.0 /usr/local/pig
+RUN rm pig-0.17.0.tar.gz
 ENV PATH="${PATH}:/usr/local/pig/bin"
 
 RUN tar -xzf spark-3.4.0-bin-hadoop3-scala2.13.tgz
 RUN mv spark-3.4.0-bin-hadoop3-scala2.13 /usr/local/spark
+RUN rm spark-3.4.0-bin-hadoop3-scala2.13.tgz
 ENV SPARK_HOME=/usr/local/spark
 ENV PATH="${PATH}:${SPARK_HOME}/bin"
 
