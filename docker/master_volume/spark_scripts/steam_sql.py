@@ -22,7 +22,8 @@ spark.read.json(steam_spy).select(
 ).createOrReplaceTempView("steam_spy")
 
 spark.sql("""
-SELECT * from steam_spy
+SELECT * FROM steam_store s1
+JOIN steam_spy s2 ON s1.steam_appid = s2.appid
 """).write.csv('/spark-result/steam/sql', header=True)
 
 spark.stop()
