@@ -15,7 +15,7 @@ result = df.select(
     when(col("total_deaths") != "", col("total_deaths").cast("int")).otherwise(0).alias("total_deaths"),
     when(col("new_deaths") != "", col("new_deaths").cast("int")).otherwise(0).alias("new_deaths"),
     when(col("new_cases_per_million") != "", col("new_cases_per_million").cast("int")).otherwise(0).alias("new_cases_per_million"),
-    avg("new_cases_per_million").over(Window.orderBy()).alias("average_new_cases_per_million")
+    avg(when(col("new_cases_per_million") != "", col("new_cases_per_million").cast("int")).otherwise(0)).over(Window.orderBy()).alias("average_new_cases_per_million")
 )
 
 result.write.csv('/spark-result/covid/df', header=True)
