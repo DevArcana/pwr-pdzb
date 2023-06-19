@@ -1,3 +1,6 @@
-.local
+__pycache__
+.ipynb_checkpoints
 .ipython
-.jupyter/lab/user-settings
+.jupyter
+.local
+.npm
