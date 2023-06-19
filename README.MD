@@ -1,11 +1,12 @@
 # Hadoop + Pig + Hive + Spark 
 
-This repo is based mostly on https://github.com/wxw-matt/docker-hadoop. It should work on AMD64 and ARM64 architectures. It's not really polished and I used a couple of hacks to solve some problems, but generally it works.
+This repo is based mostly on https://github.com/wxw-matt/docker-hadoop. It should work on AMD64 and ARM64 architectures. It's not really polished and we used a couple of hacks to solve problems, but generally it works.
 
-Additional features:
+Main features:
 - Pig, Hive and Spark installed and preconfigured
-- Jupyter notebook to control all containers via SSH
+- One central jupyter notebook to control all containers via SSH
 
+It should work on both AMD64 and ARM64 architectures.
 # How to start and stop 
 
 To start all containers, navigate to /docker/hadoop directory and run:
@@ -31,7 +32,8 @@ But that should not be needed, as all of them are (at the moment of writing) alr
 
 # How to run hadoop jobs
 
-Use the jupyter notebook. It should be available on [localhost:8888](http://localhost:8888)
+Use the jupyter notebook. It should be available on [localhost:8888](http://localhost:8888). 
+
 
 
 
