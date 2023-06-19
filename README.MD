@@ -1,6 +1,6 @@
 # Hadoop + Pig + Hive + Spark 
 
-This repo is based mostly on https://github.com/wxw-matt/docker-hadoop. It should work on AMD64 and ARM64 architectures. It's not really polished and we used a couple of hacks to solve problems, but generally it works.
+This repo is based mostly on https://github.com/wxw-matt/docker-hadoop. It should work on AMD64 and ARM64 architectures. It's not really polished and we used a couple of hacks to solve problems, but generally it works. We used for a university big data lab in group of 3 people (Piotr Krzystanek, Michał Liss, Marceli Sokólski).
 
 Main features:
 - Pig, Hive and Spark installed and preconfigured
@@ -10,6 +10,14 @@ It should work on both AMD64 and ARM64 architectures.
 
 # Requirements
 - [Docker](https://www.docker.com/)
+- docker compose
+  
+# WSLCONFIG (Windows only)
+We recommend adding .wslconfig file to your Windows user main directory. **Use at least 8GB of RAM, but we recommend using more if you can**.
+```
+[wsl2]
+memory=8GB
+```
 
 # Directory structure
 
@@ -33,13 +41,6 @@ To stop all containers, navigate to /docker/hadoop directory run:
 ```bash
 ./stop_all.sh # For amd64
 ./stop_all_arm.sh # For arm64
-```
-
-# WSLCONFIG (Windows only)
-We recommend adding .wslconfig file to your Windows user main directory. **Use at least 8GB of RAM, but we recommend using more if you can**.
-```
-[wsl2]
-memory=8GB
 ```
 
 # How to build images manually
@@ -68,7 +69,3 @@ Those containers have /docker/master_volume mounted, so you can paste all necess
 # How to run hadoop jobs (easy way)
 
 Paste all necessary scripts/jars to /docker/master_volume and use jupyter notebook. It should be available on [localhost:8888](http://localhost:8888). There is a demo notebook with working examples there.
-
-
-
-
