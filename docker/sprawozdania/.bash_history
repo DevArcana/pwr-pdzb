@@ -1,2 +1,0 @@
-ssh root@namenode
-exit
