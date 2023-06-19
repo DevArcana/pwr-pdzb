@@ -7,6 +7,17 @@ Main features:
 - One central jupyter notebook to control all containers via SSH
 
 It should work on both AMD64 and ARM64 architectures.
+
+# Directory structure
+
+There are:
+| Directory             | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| /docker/hadoop        | All dockerfiles, configuration files, scripts          |
+| /docker/master_volume | Directory that is mounted in most important containers |
+| /docker/sprawozdania  | Directory that is mounted in jupyter notebook          |
+
+
 # How to start and stop 
 
 To start all containers, navigate to /docker/hadoop directory and run:
